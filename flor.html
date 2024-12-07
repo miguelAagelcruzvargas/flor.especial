@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Un Regalo Especial</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: white;
+      animation: twinkle 2s infinite alternate, moveStar 20s linear infinite;
+    }
+
+    @keyframes twinkle {
+      from { opacity: 0.5; }
+      to { opacity: 1; }
+    }
+
+    @keyframes moveStar {
+      from { transform: translateY(0); }
+      to { transform: translateY(200px); }
+    }
+
+    #messageBox {
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2));
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 30px rgba(255, 255, 255, 0.7);
+      font-family: 'Courier New', monospace;
+      font-size: 24px;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+      z-index: 100; 
+    }
+
+    #messageBox.show {
+      opacity: 1;
+      transform: translate(-50%, -20px);
+    }
+
+    #musicControl {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      z-index: 1000;
+      transition: background 0.3s ease;
+      opacity: 0.7;
+    }
+
+    #musicControl:hover {
+      background: rgba(255, 255, 255, 0.3);
+      opacity: 1;
+    }
+
+    audio {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<canvas id="flower"></canvas>
+<div id="messageBox"></div>
+<button id="musicControl">🎵 Iniciar Música</button>
+<audio id="backgroundMusic" loop>
+  <source src=r"RECURSOS\audios\1.mp3" type="audio/mpeg">
+  Tu navegador no soporta el elemento de audio.
+</audio>
+
+<script>
+  // Control de música
+  const music = document.getElementById('backgroundMusic');
+  const musicControl = document.getElementById('musicControl');
+  let isPlaying = false;
+
+  function toggleMusic() {
+    if (isPlaying) {
+      music.pause();
+      musicControl.textContent = '🎵 Iniciar Música';
+    } else {
+      music.play();
+      musicControl.textContent = '🎵 Pausar Música';
+    }
+    isPlaying = !isPlaying;
+  }
+
+  // Iniciar música con la primera interacción
+  document.addEventListener('click', () => {
+    if (!isPlaying) {
+      music.play();
+      musicControl.textContent = '🎵 Pausar Música';
+      isPlaying = true;
+    }
+  }, { once: true });
+
+  musicControl.addEventListener('click', toggleMusic);
+
+  // Estrellas
+  function createStars() {
+    const numStars = 150;
+    for (let i = 0; i < numStars; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      const size = Math.random() * 2 + 1 + 'px';
+      star.style.width = size;
+      star.style.height = size;
+      star.style.left = Math.random() * window.innerWidth + 'px';
+      star.style.top = Math.random() * window.innerHeight + 'px';
+      star.style.animationDelay = Math.random() * 2 + 's, ' + Math.random() * 20 + 's';
+      document.body.appendChild(star);
+    }
+  }
+
+  // Flor y mensajes
+  function drawFlower() {
+    const canvas = document.getElementById('flower');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2 + 50;
+
+    let petalCount = 10;
+    let animationProgress = 0;
+
+    const messages = [
+      "Eres mi inspiración 🌟",
+      "Tu sonrisa ilumina mi día 😊",
+      "Gracias por ser tan especial 💖",
+      "No hay nadie como tú ✨",
+      "Eres mi flor favorita 🌸",
+      "Siempre serás mi razón de felicidad 💕",
+      "Te valoro más de lo que imaginas 💎",
+      "Por ti, el mundo es más hermoso 🌍",
+      "Gracias por existir 🥰",
+      "Te quiero mucho ❤️"
+    ];
+
+    let currentPetal = 0;
+    let fallenPetals = new Set();
+    let petalsPositions = [];
+
+    function isInsidePetal(x, y, petalX, petalY, radius) {
+      return Math.hypot(x - petalX, y - petalY) < radius;
+    }
+
+    function drawPetals() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Tallo
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY + 50);
+      ctx.lineTo(centerX, canvas.height - 50);
+      ctx.strokeStyle = "green";
+      ctx.lineWidth = 10;
+      ctx.stroke();
+
+      // Hojas
+      const leafGradient = ctx.createLinearGradient(0, 0, 0, 200);
+      leafGradient.addColorStop(0, "rgba(0, 128, 0, 0.9)");
+      leafGradient.addColorStop(1, "rgba(0, 200, 0, 0.7)");
+
+      ctx.beginPath();
+      ctx.ellipse(centerX - 60, centerY + 200, 50, 20, Math.PI / 4, 0, Math.PI * 2);
+      ctx.fillStyle = leafGradient;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.ellipse(centerX + 60, centerY + 200, 50, 20, -Math.PI / 4, 0, Math.PI * 2);
+      ctx.fillStyle = leafGradient;
+      ctx.fill();
+
+      const petalRadius = 150;
+      petalsPositions = [];
+
+      for (let i = 0; i < petalCount; i++) {
+        if (fallenPetals.has(i)) continue;
+
+        const angle = (Math.PI * 2 * i) / petalCount;
+        const radius = petalRadius * Math.min(animationProgress, 1);
+
+        const petalX = centerX + petalRadius * Math.sin(angle);
+        const petalY = centerY - petalRadius * Math.cos(angle);
+        petalsPositions.push({ x: petalX, y: petalY, index: i });
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(angle);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(radius / 2, -radius, 0, -radius * 1.5);
+        ctx.quadraticCurveTo(-radius / 2, -radius, 0, 0);
+        ctx.fillStyle = `rgba(255, ${100 + i * 10}, 150, 0.8)`;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Centro de la flor
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 40, 0, Math.PI * 2);
+      ctx.fillStyle = 'yellow';
+      ctx.fill();
+
+      animationProgress += 0.01;
+
+      if (animationProgress <= 1.5) {
+        requestAnimationFrame(drawPetals);
+      }
+    }
+
+    function animateFallingPetal(petal) {
+      let y = petal.y;
+      let x = petal.x;
+      const speed = Math.random() * 2 + 1;
+      const swaySpeed = Math.random() * 0.05 + 0.02;
+      let angle = 0;
+
+      function fall() {
+        y += speed;
+        angle += swaySpeed;
+        x += Math.sin(angle) * 2;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawPetals();
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(Math.sin(angle) * 0.2);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(75, -75, 0, -150);
+        ctx.quadraticCurveTo(-75, -75, 0, 0);
+        ctx.fillStyle = `rgba(255, 120, 150, 0.8)`;
+        ctx.fill();
+        ctx.restore();
+
+        if (y < canvas.height + 150) {
+          requestAnimationFrame(fall);
+        } else {
+          if (fallenPetals.size === petalCount) {
+            setTimeout(() => {
+              fallenPetals.clear();
+              currentPetal = 0;
+              animationProgress = 0;
+              drawPetals();
+            }, 2000);
+          }
+        }
+      }
+
+      fall();
+    }
+
+    function showMessage(message) {
+      const messageBox = document.getElementById('messageBox');
+      messageBox.textContent = message;
+      messageBox.classList.add('show');
+
+      setTimeout(() => {
+        messageBox.classList.remove('show');
+      }, 3000);
+    }
+
+    canvas.addEventListener("click", (event) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+
+      for (let petal of petalsPositions) {
+        if (isInsidePetal(mouseX, mouseY, petal.x, petal.y, 50) && !fallenPetals.has(petal.index)) {
+          fallenPetals.add(petal.index);
+          animateFallingPetal(petal);
+
+          if (currentPetal < messages.length) {
+            showMessage(messages[currentPetal]);
+            currentPetal++;
+          } else {
+            showMessage("Eres la persona más especial de mi vida ❤️");
+          }
+
+          break;
+        }
+      }
+    });
+
+    drawPetals();
+  }
+
+  createStars();
+  drawFlower();
+</script>
+</body>
+</html>
